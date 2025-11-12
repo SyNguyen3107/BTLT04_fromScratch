@@ -1,0 +1,18 @@
+# Bỏ qua các file do người dùng tự cấu hình
+*.user
+*.suo
+*.sln.docstates
+
+# Bỏ qua các thư mục build
+[Bb]in/
+[Oo]bj/
+
+# Bỏ qua thư mục .vs (thư mục cấu hình của Visual Studio)
+.vs/
+
+# Bỏ qua các file packages (nên dùng NuGet restore)
+packages/
+
+# Bỏ qua các file hệ thống
+[Tt]humbs.db
+*.orig
