@@ -149,5 +149,14 @@ namespace BTLT04_fromScratch
             GunShot.Volume = 0.8;
             GunShot.Play();
         }
+        private void Exit_btn_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
+
+        private void Retry_btn_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

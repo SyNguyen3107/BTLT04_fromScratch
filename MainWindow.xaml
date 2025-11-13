@@ -14,5 +14,39 @@
         Background="Black"
         HorizontalAlignment="Center" VerticalAlignment="Center"
         ClipToBounds="True"/>
+        <Grid x:Name="GameOverMenu"
+      Background="#0E0B28"
+      Width="768" Height="768"
+      Panel.ZIndex="999"
+      Visibility="Collapsed"
+      >
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Image Source="/Assets/Sprites/Sprite16x16/Other/Title.png"
+               Height="400" Width="Auto"
+               Margin="0,0,0,50" 
+               RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+
+                <Button x:Name="Retry_btn"
+                Content="RETRY"
+                FontSize="30"
+                Foreground="#FFD700"
+                Background="Transparent"
+                Width="200" Height="60"
+                Margin="0,0,0,20"
+                Click="Retry_btn_Click"
+                FontFamily="/Assets/Font/#Stardew Valley Stonks"
+                />
+                <Button x:Name="Exit_btn"
+                Content="EXIT"
+                Foreground="#FFD700"
+                Background="Transparent"
+                FontSize="30"
+                Width="200" Height="60"
+                Margin="0,0,0,20"
+                Click="Exit_btn_Click"
+                FontFamily="/Assets/Font/#Stardew Valley Stonks"
+                />
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>
