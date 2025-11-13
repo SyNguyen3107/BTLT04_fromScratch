@@ -20,6 +20,9 @@ namespace BTLT04_fromScratch
         const int MAP_ROWS = 16;
         const int MAP_COLS = 16;
         // số trong ma trận tương ứng với STT của ảnh trong thư mực Assets/Sprites/Sprite16x16/Environment/
+
+        bool isGameRunning = true; // Biến trạng thái game
+
         int[,] mapMatrix = new int[MAP_ROWS, MAP_COLS] {
                 { 6, 6, 6, 6, 6, 6, 1, 1, 1, 1, 6, 6, 6, 6, 6, 6 },
                 { 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 6 },
@@ -54,6 +57,7 @@ namespace BTLT04_fromScratch
         MediaPlayer bgMusic = new MediaPlayer(); string musicPath;
         MediaPlayer GunShot = new MediaPlayer(); string gunShotPath;
         MediaPlayer Destroyed = new MediaPlayer(); string destroyedPath;
+        MediaPlayer GameOver = new MediaPlayer(); string gameOverPath;
         public MainWindow()
         {
             InitializeComponent();
@@ -79,6 +83,7 @@ namespace BTLT04_fromScratch
             musicPath = "Assets/Audio/Overworld.wav";
             gunShotPath = "Assets/Audio/GunShot.wav";
             destroyedPath = "Assets/Audio/Destroyed0.wav";
+            gameOverPath = "Assets/Audio/GameOver.wav";
         }
         void DrawMap()
         {
@@ -128,6 +133,39 @@ namespace BTLT04_fromScratch
                 }
             }
         }
+        public void EndGame()
+        {
+            // Nếu game đã kết thúc rồi thì không làm gì thêm (tránh gọi chồng chéo)
+            if (isGameRunning == false) return;
+
+            // 1. Đánh dấu game dừng
+            isGameRunning = false;
+
+            // 2. Dừng nhạc nền (Nếu muốn) hoặc phát nhạc Game Over
+            bgMusic.Stop(); // Bạn cần viết thêm hàm Stop trong AudioPlayer nếu muốn
+            PlayGameOverMusic();
+
+            // 3. Hiện Menu Game Over
+            GameOverMenu.Visibility = Visibility.Visible;
+        }
+        public void RestartGame()
+        {
+            // 1. Ẩn Menu Game Over
+            GameOverMenu.Visibility = Visibility.Collapsed;
+
+            // 2. Reset trạng thái
+            isGameRunning = true;
+
+            // 3. Dọn dẹp Map cũ (CỰC KỲ QUAN TRỌNG)
+            // Nếu không có dòng này, map mới sẽ vẽ đè lên map cũ -> Tốn RAM, lag game
+            GameCanvas.Children.Clear();
+
+            // 4. Vẽ lại Map và các đối tượng ban đầu
+            DrawMap();
+
+            // 5. Reset nhạc nền (nếu nãy đã tắt)
+            PlayBackgroundMusic();
+        }
         void PlayBackgroundMusic()
         {
             // Đường dẫn tương đối tính từ file .exe (trong thư mục bin/Debug)
@@ -149,14 +187,19 @@ namespace BTLT04_fromScratch
             GunShot.Volume = 0.8;
             GunShot.Play();
         }
+        void PlayGameOverMusic()
+        {
+            GameOver.Open(new Uri(gameOverPath, UriKind.Relative));
+            GameOver.Volume = 0.7;
+            GameOver.Play();
+        }
         private void Exit_btn_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
         }
-
         private void Retry_btn_Click(object sender, RoutedEventArgs e)
         {
-
+            RestartGame();
         }
     }
 }
