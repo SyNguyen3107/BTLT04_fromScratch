@@ -8,4 +8,14 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Resource Include="Assets\Sprites\Sprite16x16\Environment\Desert0.png" />
+    <Resource Include="Assets\Sprites\Sprite16x16\Environment\Desert1.png" />
+    <Resource Include="Assets\Sprites\Sprite16x16\Environment\Desert2.png" />
+    <Resource Include="Assets\Sprites\Sprite16x16\Environment\Desert3.png" />
+    <Resource Include="Assets\Sprites\Sprite16x16\Environment\Desert4.png" />
+    <Resource Include="Assets\Sprites\Sprite16x16\Environment\Desert5.png" />
+    <Resource Include="Assets\Sprites\Sprite16x16\Environment\Desert6.png" />
+  </ItemGroup>
+
 </Project>

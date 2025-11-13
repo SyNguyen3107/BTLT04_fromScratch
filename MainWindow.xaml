@@ -5,8 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BTLT04_fromScratch"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-
+        Title="MainWindow" Height="820" Width="800"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen">
+    <Grid Background="#333333">
+        <Canvas Name="GameCanvas" 
+        Height="768" Width="768"
+        Background="Black"
+        HorizontalAlignment="Center" VerticalAlignment="Center"
+        ClipToBounds="True"/>
     </Grid>
 </Window>
