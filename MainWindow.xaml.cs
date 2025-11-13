@@ -21,13 +21,13 @@ namespace BTLT04_fromScratch
         const int MAP_COLS = 16;
         // số trong ma trận tương ứng với STT của ảnh trong thư mực Assets/Sprites/Sprite16x16/Environment/
         int[,] mapMatrix = new int[MAP_ROWS, MAP_COLS] {
-                { 6, 6, 6, 6, 6, 6, 6, 1, 1, 1, 6, 6, 6, 6, 6, 6 },
+                { 6, 6, 6, 6, 6, 6, 1, 1, 1, 1, 6, 6, 6, 6, 6, 6 },
                 { 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 6 },
                 { 6, 2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 3, 3, 3, 2, 6 },
                 { 6, 2, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 2, 6 },
                 { 6, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 6 },
                 { 6, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 6 },
-                { 6, 2, 3, 3, 3, 3, 4, 3, 3, 3, 3, 3, 3, 3, 2, 6 },
+                { 1, 2, 3, 3, 3, 3, 4, 3, 3, 3, 3, 3, 3, 3, 2, 1 },
                 { 1, 2, 4, 3, 3, 3, 3, 3, 3, 3, 4, 3, 3, 3, 2, 1 },
                 { 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 1 },
                 { 1, 2, 3, 3, 3, 3, 3, 3, 4, 3, 3, 3, 3, 3, 2, 1 },
@@ -36,16 +36,31 @@ namespace BTLT04_fromScratch
                 { 6, 2, 3, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 6 },
                 { 6, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 2, 6 },
                 { 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 6 },
-                { 6, 6, 6, 6, 6, 6, 6, 1, 1, 1, 6, 6, 6, 6, 6, 6 }
+                { 6, 6, 6, 6, 6, 6, 1, 1, 1, 1, 6, 6, 6, 6, 6, 6 }
             };
+        //Các sprite ảnh môi trường cần dùng
         BitmapImage Desert1, Desert2, Desert3, Desert4, Desert6;
+
+        //Các sprite ảnh nhân vật cần dùng
+        BitmapImage PlayerDown, PlayerUp, PlayerLeft, PlayerRight, PlayerLeg0, PlayerLeg1, PlayerLeg2, PlayerLeg3;
+
+        //Spite đạn
+        BitmapImage Bullet;
+
+        //Các sprite ảnh kẻ địch cần dùng
+        BitmapImage Orc0, Orc1;
+
+        //Mỗi âm thanh cần 1 MediaPlayer riêng
+        MediaPlayer bgMusic = new MediaPlayer(); string musicPath;
+        MediaPlayer GunShot = new MediaPlayer(); string gunShotPath;
+        MediaPlayer Destroyed = new MediaPlayer(); string destroyedPath;
         public MainWindow()
         {
             InitializeComponent();
-            
+
             LoadAssets();
             DrawMap();
-
+            PlayBackgroundMusic();
         }
         void LoadAssets()
         {
@@ -55,7 +70,15 @@ namespace BTLT04_fromScratch
             Desert3 = new BitmapImage(new Uri("Assets/Sprites/Sprite16x16/Environment/Desert3.png", UriKind.Relative));
             Desert4 = new BitmapImage(new Uri("Assets/Sprites/Sprite16x16/Environment/Desert4.png", UriKind.Relative));
             Desert6 = new BitmapImage(new Uri("Assets/Sprites/Sprite16x16/Environment/Desert6.png", UriKind.Relative));
-            
+
+            Bullet = new BitmapImage(new Uri("Assets/Sprites/Sprite16x16/Other/Bullet0.png", UriKind.Relative));
+
+            Orc0 = new BitmapImage(new Uri("Assets/Sprites/Sprite16x16/Enemy/Orc0.png", UriKind.Relative));
+            Orc1 = new BitmapImage(new Uri("Assets/Sprites/Sprite16x16/Enemy/Orc1.png", UriKind.Relative));
+
+            musicPath = "Assets/Audio/Overworld.wav";
+            gunShotPath = "Assets/Audio/GunShot.wav";
+            destroyedPath = "Assets/Audio/Destroyed0.wav";
         }
         void DrawMap()
         {
@@ -90,7 +113,8 @@ namespace BTLT04_fromScratch
                         case 6:
                             tile.Source = Desert6;
                             break;
-                    };
+                    }
+                    ;
 
                     // Đặt vị trí trên Canvas (X = Cột * 32, Y = Hàng * 32)
                     Canvas.SetLeft(tile, c * TILE_SIZE);
@@ -103,6 +127,27 @@ namespace BTLT04_fromScratch
                     GameCanvas.Children.Add(tile);
                 }
             }
+        }
+        void PlayBackgroundMusic()
+        {
+            // Đường dẫn tương đối tính từ file .exe (trong thư mục bin/Debug)
+            bgMusic.Open(new Uri(musicPath, UriKind.Relative));
+            bgMusic.Volume = 0.5;
+            // Loop
+            // MediaPlayer không có thuộc tính Loop=true, ta dùng sự kiện MediaEnded
+            bgMusic.MediaEnded += (sender, e) =>
+            {
+                bgMusic.Position = TimeSpan.Zero;
+                bgMusic.Play();
+            };
+
+            bgMusic.Play();
+        }
+        void PlayGunShot()
+        {
+            GunShot.Open(new Uri(gunShotPath, UriKind.Relative));
+            GunShot.Volume = 0.8;
+            GunShot.Play();
         }
     }
 }

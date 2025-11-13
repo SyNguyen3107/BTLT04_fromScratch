@@ -9,6 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\Audio\Overworld.wav" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\Audio\Overworld.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Resource Include="Assets\Sprites\Sprite16x16\Environment\Desert0.png" />
     <Resource Include="Assets\Sprites\Sprite16x16\Environment\Desert1.png" />
     <Resource Include="Assets\Sprites\Sprite16x16\Environment\Desert2.png" />
