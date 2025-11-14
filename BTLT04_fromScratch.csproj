@@ -94,6 +94,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Resource Include="Assets\Font\stardew-valley-stonks.ttf" />
+    <Resource Include="Assets\Icon\icon.png" />
     <Resource Include="Assets\Sprites\Sprite16x16\Character\PlayerDown.png" />
     <Resource Include="Assets\Sprites\Sprite16x16\Character\PlayerLeft.png" />
     <Resource Include="Assets\Sprites\Sprite16x16\Character\PlayerLeg0.png" />

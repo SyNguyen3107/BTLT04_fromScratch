@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -8,6 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Threading.Tasks;
 
 namespace BTLT04_fromScratch
 {
@@ -22,6 +24,11 @@ namespace BTLT04_fromScratch
         // số trong ma trận tương ứng với STT của ảnh trong thư mực Assets/Sprites/Sprite16x16/Environment/
 
         bool isGameRunning = true; // Biến trạng thái game
+        System.Windows.Threading.DispatcherTimer spawnTimer;// Timer dùng để spawn kẻ địch định kỳ
+        int currentWave = 0;
+        int enemyAlive = 0, enemyToSpawn = 0; // Biến đếm kẻ địch còn lại/tổng cần spawn
+        Random random = new Random();
+        List<Image> activeEnemies = new List<Image>();
 
         int[,] mapMatrix = new int[MAP_ROWS, MAP_COLS] {
                 { 6, 6, 6, 6, 6, 6, 1, 1, 1, 1, 6, 6, 6, 6, 6, 6 },
@@ -65,6 +72,7 @@ namespace BTLT04_fromScratch
             LoadAssets();
             DrawMap();
             PlayBackgroundMusic();
+            StartNextWave();
         }
         void LoadAssets()
         {
@@ -131,6 +139,119 @@ namespace BTLT04_fromScratch
                     // Thêm vào Canvas
                     GameCanvas.Children.Add(tile);
                 }
+            }
+        }
+        void StartNextWave()
+        {
+            currentWave++;
+
+            // Tính toán số lượng quái cho đợt này
+            // Ví dụ: 5 quái, rồi 8, rồi 11...
+            enemyToSpawn = 5 + (currentWave - 1) * 3;
+
+            // Lúc bắt đầu đợt, chưa có con nào sống
+            enemyAlive = 0;
+
+            // Nếu timer chưa được tạo, thì tạo mới
+            if (spawnTimer == null)
+            {
+                spawnTimer = new System.Windows.Threading.DispatcherTimer();
+                spawnTimer.Interval = TimeSpan.FromSeconds(1); // Tốc độ spawn (1 giây/con)
+                spawnTimer.Tick += OnSpawnTimerTick; // Gắn sự kiện Tick
+            }
+
+            // Bật Timer để bắt đầu spawn
+            spawnTimer.Start();
+        }
+        void OnSpawnTimerTick(object sender, EventArgs e)
+        {
+            // 1. Kiểm tra xem còn quái trong đợt này không
+            if (enemyToSpawn > 0)
+            {
+                SpawnOneEnemy();
+                enemyToSpawn--;
+                enemyAlive++;
+            }
+            else
+            {
+                // 2. Nếu đã spawn đủ số lượng của đợt này
+                // Timer tự động dừng lại và đợi
+                spawnTimer.Stop();
+            }
+        }
+        void SpawnOneEnemy()
+        {
+            // LƯU Ý QUAN TRỌNG:
+            //TẠM THỜI để là ảnh kẻ địch, sau này sẽ đổi thành đối tượng Enemy
+            Image enemySprite = new Image();
+
+            enemySprite.Source = new BitmapImage(new Uri("Assets/Sprites/Sprite16x16/Enemy/Orc0.png", UriKind.Relative));
+            enemySprite.Width = 48; 
+            enemySprite.Height = 48;
+            RenderOptions.SetBitmapScalingMode(enemySprite, BitmapScalingMode.NearestNeighbor);
+
+            // --- THUẬT TOÁN TÍNH TOẠ ĐỘ ---
+            double spawnX = 0;
+            double spawnY = 0;
+
+            // Random từ 0 đến 3 để chọn cạnh: 0=Trên, 1=Dưới, 2=Trái, 3=Phải
+            int side = random.Next(0, 4);
+
+            // Kích thước vùng chơi
+            double mapSize = 768;
+
+            switch (side)
+            {
+                case 0: // Cạnh TRÊN
+                    spawnX = random.Next(288, 480); // Random chiều ngang
+                    spawnY =0; // Sát mép trên
+                    break;
+
+                case 1: // Cạnh DƯỚI
+                    spawnX = spawnX = random.Next(288, 480); ;
+                    spawnY = mapSize - 48; // Sát mép dưới (trừ đi chiều cao quái)
+                    break;
+
+                case 2: // Cạnh TRÁI
+                    spawnX = 0;
+                    spawnY = random.Next(288, 480);
+                    break;
+
+                case 3: // Cạnh PHẢI
+                    spawnX = mapSize - 48;
+                    spawnY = random.Next(288, 480);
+                    break;
+            }
+
+            // Đặt vị trí cho quái
+            Canvas.SetLeft(enemySprite, spawnX);
+            Canvas.SetTop(enemySprite, spawnY);
+
+            // Đưa quái lên lớp trên cùng (trên sàn)
+            Panel.SetZIndex(enemySprite, 10);
+
+            // Thêm vào Canvas
+            GameCanvas.Children.Add(enemySprite);
+
+            //Thêm quái này vào danh sách quản lý
+            activeEnemies.Add(enemySprite);
+        }
+        public async void OnEnemyKilled(Image enemyThatDied)
+        {
+            activeEnemies.Remove(enemyThatDied);
+            GameCanvas.Children.Remove(enemyThatDied);
+            Destroyed.Play();
+
+            // 1. Trừ số quái đang sống
+            enemyAlive--;
+
+            // 2. KIỂM TRA QUA MÀN
+            // Nếu timer đã dừng (spawn hết) VÀ quái cũng bị giết hết
+            if (enemyToSpawn == 0 && enemyAlive == 0)
+            {
+                await Task.Delay(3000);
+                // Bắt đầu đợt tiếp theo
+                StartNextWave();
             }
         }
         public void EndGame()
