@@ -1,20 +1,9 @@
-﻿using System;
-using System.Collections.Generic; // Cần thư viện này
-using System.Diagnostics;       // Cần thư viện này
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;       // Cần thư viện này
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Windows.Threading;
 
 
@@ -402,8 +391,8 @@ namespace BTLT04_fromScratch
             activeEnemies.Add(enemyObj);
         }
 
-        // Hàm này sẽ được gọi bởi logic va chạm (TODO 6)
-        public async void OnEnemyKilled(Enemy enemyThatDied) // Sửa: (Image -> Enemy)
+        // Hàm này sẽ được gọi bởi logic va chạm
+        public async void OnEnemyKilled(Enemy enemyThatDied)
         {
             // (Logic xóa đã được chuyển vào GameLoop,
             // hàm này giờ chỉ chịu trách nhiệm đếm và bắt đầu wave mới)
