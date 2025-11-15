@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -10,7 +9,7 @@ namespace BTLT04_fromScratch
     {
         public double x;
         public double y;
-        public double Speed = 1;
+        public double Speed = 0.8;
         public bool IsDead = false;
         public Image EnemyVisual { get; set; }
         private BitmapImage[] frames = new BitmapImage[2];
