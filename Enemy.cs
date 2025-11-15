@@ -6,12 +6,12 @@ using System.Windows.Media.Imaging;
 
 namespace BTLT04_fromScratch
 {
-    internal class Enemy
+    public class Enemy
     {
         public double x;
         public double y;
         public double Speed = 1;
-       public bool IsDead = false;
+        public bool IsDead = false;
         public Image EnemyVisual { get; set; }
         private BitmapImage[] frames = new BitmapImage[2];
         private int currentFrame = 0;
@@ -61,9 +61,9 @@ namespace BTLT04_fromScratch
                 EnemyVisual.Source = frames[currentFrame];
             }
         }
-    
 
-    public Rect GetRect()
+
+        public Rect GetRect()
         {
             return new Rect(x, y, EnemyVisual.Width, EnemyVisual.Height);
         }
