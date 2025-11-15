@@ -10,12 +10,10 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Threading.Tasks;
-<<<<<<< HEAD
 using System.Collections.Generic;
 using System.Diagnostics;
-=======
 using System.Windows.Threading;
->>>>>>> 73f80ddf1773fd73735da781ed7bf75173fc3042
+
 
 namespace BTLT04_fromScratch
 {
@@ -87,13 +85,11 @@ namespace BTLT04_fromScratch
         MediaPlayer Destroyed = new MediaPlayer(); string destroyedPath;
         MediaPlayer GameOver = new MediaPlayer(); string gameOverPath;
 
-<<<<<<< HEAD
+
         // Bộ hỗ trợ đo thời gian cho vòng lặp game
         Stopwatch loopStopwatch = new Stopwatch();
         long lastTicks = 0;
 
-=======
->>>>>>> 73f80ddf1773fd73735da781ed7bf75173fc3042
         public MainWindow()
         {
             InitializeComponent();
@@ -105,13 +101,11 @@ namespace BTLT04_fromScratch
             PlayBackgroundMusic();
             StartNextWave();
 
-<<<<<<< HEAD
-            // Sử dụng chuột để bắn theo vị trí con trỏ
-            GameCanvas.MouseLeftButtonDown += GameCanvas_MouseLeftButtonDown;
+
 
             // KeyDown để bắn bằng phím mũi tên (Up/Down/Left/Right)
             this.KeyDown += MainWindow_KeyDown;
-=======
+
             // Player
             player = new Player(300, 300);
             GameCanvas.Children.Add(player.PlayerVisual);
@@ -122,7 +116,9 @@ namespace BTLT04_fromScratch
             this.KeyDown += OnKeyDown;
             this.KeyUp += OnKeyUp;
 
-            GameCanvas.MouseLeftButtonDown += GameCanvas_MouseLeftButtonDown;
+
+
+
         }
         private void GameLoop(object sender, EventArgs e)
         {
@@ -137,6 +133,10 @@ namespace BTLT04_fromScratch
 
             if (dx != 0 || dy != 0)
                 player.Move(dx, dy);
+            foreach ( var enemy in activeEnemies)
+            {
+                enemy.Update(player);
+            }    
         }
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
@@ -158,7 +158,7 @@ namespace BTLT04_fromScratch
         {
             Point target = e.GetPosition(GameCanvas);
             player.Shoot(target);
->>>>>>> 73f80ddf1773fd73735da781ed7bf75173fc3042
+
         }
 
         void LoadAssets()
@@ -224,11 +224,8 @@ namespace BTLT04_fromScratch
                 b.Update(delta);
             }
 
-            // 2. Cập nhật kẻ địch
-            foreach (var en in activeEnemies)
-            {
-                en.Update(delta);
-            }
+           
+            
 
             // 3. Kiểm tra va chạm: Đạn vs Kẻ địch
             // Đánh dấu cờ IsDead; KHÔNG được xóa trong lúc đang duyệt
@@ -382,14 +379,7 @@ namespace BTLT04_fromScratch
 
         void SpawnOneEnemy()
         {
-            // Tạo image dùng để hiển thị kẻ địch
-            Image enemySprite = new Image
-            {
-                Source = Orc0,
-                Width = 48,
-                Height = 48
-            };
-            RenderOptions.SetBitmapScalingMode(enemySprite, BitmapScalingMode.NearestNeighbor);
+         
 
             // --- THUẬT TOÁN TÍNH TOẠ ĐỘ ---
             double spawnX = 0;
@@ -423,19 +413,19 @@ namespace BTLT04_fromScratch
                     spawnY = random.Next(288, 480);
                     break;
             }
-
+            Enemy enemyObj = new Enemy(spawnX, spawnY);
             // Đặt vị trí cho quái
-            Canvas.SetLeft(enemySprite, spawnX);
-            Canvas.SetTop(enemySprite, spawnY);
+            Canvas.SetLeft(enemyObj.EnemyVisual, spawnX);
+            Canvas.SetTop(enemyObj.EnemyVisual, spawnY);
 
             // Đưa quái lên lớp trên cùng (trên sàn)
-            Panel.SetZIndex(enemySprite, 10);
+            Panel.SetZIndex(enemyObj.EnemyVisual, 10);
 
             // Thêm vào Canvas
-            GameCanvas.Children.Add(enemySprite);
+            GameCanvas.Children.Add(enemyObj.EnemyVisual);
 
             // Thêm quái này vào danh sách quản lý (Enemy object)
-            var enemyObj = new Enemy(enemySprite, spawnX, spawnY);
+            
             activeEnemies.Add(enemyObj);
         }
 
@@ -530,12 +520,7 @@ namespace BTLT04_fromScratch
         }
 
         // Mouse shooting: tạo đạn từ vị trí người chơi bay về vị trí con trỏ
-        private void GameCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            // Lấy toạ độ con trỏ so với GameCanvas
-            Point pos = e.GetPosition(GameCanvas);
-            ShootAt(pos);
-        }
+       
 
         // Bắn theo vector đã cho (dùng cho phím mũi tên)
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
