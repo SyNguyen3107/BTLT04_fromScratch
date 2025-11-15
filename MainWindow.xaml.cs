@@ -10,8 +10,12 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Threading.Tasks;
+<<<<<<< HEAD
 using System.Collections.Generic;
 using System.Diagnostics;
+=======
+using System.Windows.Threading;
+>>>>>>> 73f80ddf1773fd73735da781ed7bf75173fc3042
 
 namespace BTLT04_fromScratch
 {
@@ -20,6 +24,11 @@ namespace BTLT04_fromScratch
     /// </summary>
     public partial class MainWindow : Window
     {
+        // Player
+        Player player;
+
+        bool moveUp = false, moveDown = false, moveLeft = false, moveRight = false;
+
         const int TILE_SIZE = 48;
         const int MAP_ROWS = 16;
         const int MAP_COLS = 16;
@@ -78,10 +87,13 @@ namespace BTLT04_fromScratch
         MediaPlayer Destroyed = new MediaPlayer(); string destroyedPath;
         MediaPlayer GameOver = new MediaPlayer(); string gameOverPath;
 
+<<<<<<< HEAD
         // Bộ hỗ trợ đo thời gian cho vòng lặp game
         Stopwatch loopStopwatch = new Stopwatch();
         long lastTicks = 0;
 
+=======
+>>>>>>> 73f80ddf1773fd73735da781ed7bf75173fc3042
         public MainWindow()
         {
             InitializeComponent();
@@ -93,11 +105,60 @@ namespace BTLT04_fromScratch
             PlayBackgroundMusic();
             StartNextWave();
 
+<<<<<<< HEAD
             // Sử dụng chuột để bắn theo vị trí con trỏ
             GameCanvas.MouseLeftButtonDown += GameCanvas_MouseLeftButtonDown;
 
             // KeyDown để bắn bằng phím mũi tên (Up/Down/Left/Right)
             this.KeyDown += MainWindow_KeyDown;
+=======
+            // Player
+            player = new Player(300, 300);
+            GameCanvas.Children.Add(player.PlayerVisual);
+            // Đăng ký GameLoop 
+            CompositionTarget.Rendering += GameLoop; // Hàm GameLoop sẽ được gọi sau mỗi frame render
+
+            // Bắt input
+            this.KeyDown += OnKeyDown;
+            this.KeyUp += OnKeyUp;
+
+            GameCanvas.MouseLeftButtonDown += GameCanvas_MouseLeftButtonDown;
+        }
+        private void GameLoop(object sender, EventArgs e)
+        {
+            if (!isGameRunning) return;
+            // Player Movement
+            double dx = 0, dy = 0;
+
+            if (moveUp) dy -= player.Speed;
+            if (moveDown) dy += player.Speed;
+            if (moveLeft) dx -= player.Speed;
+            if (moveRight) dx += player.Speed;
+
+            if (dx != 0 || dy != 0)
+                player.Move(dx, dy);
+        }
+        private void OnKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Up || e.Key == Key.W) { moveUp = true; player.Facing = Direction.Up; }
+            if (e.Key == Key.Down || e.Key == Key.S) { moveDown = true; player.Facing = Direction.Down; }
+            if (e.Key == Key.Left || e.Key == Key.A) { moveLeft = true; player.Facing = Direction.Left; }
+            if (e.Key == Key.Right || e.Key == Key.D) { moveRight = true; player.Facing = Direction.Right; }
+
+            player.UpdateSprite();
+        }
+        private void OnKeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Up || e.Key == Key.W) moveUp = false;
+            if (e.Key == Key.Down || e.Key == Key.S) moveDown = false;
+            if (e.Key == Key.Left || e.Key == Key.A) moveLeft = false;
+            if (e.Key == Key.Right || e.Key == Key.D) moveRight = false;
+        }
+        private void GameCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            Point target = e.GetPosition(GameCanvas);
+            player.Shoot(target);
+>>>>>>> 73f80ddf1773fd73735da781ed7bf75173fc3042
         }
 
         void LoadAssets()
