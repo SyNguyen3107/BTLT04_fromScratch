@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -9,7 +11,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.Threading.Tasks;
 using System.Windows.Threading;
 
 namespace BTLT04_fromScratch
@@ -19,23 +20,12 @@ namespace BTLT04_fromScratch
     /// </summary>
     public partial class MainWindow : Window
     {
-        // Player
-        Player player;
-
-        bool moveUp = false, moveDown = false, moveLeft = false, moveRight = false;
-
-        const int TILE_SIZE = 48;
+        
+        //Map
+        public const int TILE_SIZE = 48;
         const int MAP_ROWS = 16;
         const int MAP_COLS = 16;
         // số trong ma trận tương ứng với STT của ảnh trong thư mực Assets/Sprites/Sprite16x16/Environment/
-
-        bool isGameRunning = true; // Biến trạng thái game
-        System.Windows.Threading.DispatcherTimer spawnTimer;// Timer dùng để spawn kẻ địch định kỳ
-        int currentWave = 0;
-        int enemyAlive = 0, enemyToSpawn = 0; // Biến đếm kẻ địch còn lại/tổng cần spawn
-        Random random = new Random();
-        List<Image> activeEnemies = new List<Image>();
-
         int[,] mapMatrix = new int[MAP_ROWS, MAP_COLS] {
                 { 6, 6, 6, 6, 6, 6, 1, 1, 1, 1, 6, 6, 6, 6, 6, 6 },
                 { 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 6 },
@@ -54,11 +44,26 @@ namespace BTLT04_fromScratch
                 { 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 6 },
                 { 6, 6, 6, 6, 6, 6, 1, 1, 1, 1, 6, 6, 6, 6, 6, 6 }
             };
+
+        // Player
+        Player player;
+        bool moveUp = false, moveDown = false, moveLeft = false, moveRight = false;
+        int playerDefaultSpawnX, playerDefaultSpawnY;
+
+
+        bool isGameRunning = true; // Biến trạng thái game
+        private Stopwatch gameTimer = new Stopwatch();
+
+        //Enemy
+        System.Windows.Threading.DispatcherTimer spawnTimer;// Timer dùng để spawn kẻ địch định kỳ
+        int currentWave = 0;
+        int enemyAlive = 0, enemyToSpawn = 0; // Biến đếm kẻ địch còn lại/tổng cần spawn
+        Random random = new Random();
+        List<Image> activeEnemies = new List<Image>();
+
+        
         //Các sprite ảnh môi trường cần dùng
         BitmapImage Desert1, Desert2, Desert3, Desert4, Desert6;
-
-        //Các sprite ảnh nhân vật cần dùng
-        BitmapImage PlayerDown, PlayerUp, PlayerLeft, PlayerRight, PlayerLeg0, PlayerLeg1, PlayerLeg2, PlayerLeg3;
 
         //Spite đạn
         BitmapImage Bullet;
@@ -82,8 +87,8 @@ namespace BTLT04_fromScratch
             StartNextWave();
 
             // Player
-            player = new Player(300, 300);
-            GameCanvas.Children.Add(player.PlayerVisual);
+            CreatePlayer();
+
             // Đăng ký GameLoop 
             CompositionTarget.Rendering += GameLoop; // Hàm GameLoop sẽ được gọi sau mỗi frame render
 
@@ -107,6 +112,17 @@ namespace BTLT04_fromScratch
             if (dx != 0 || dy != 0)
                 player.Move(dx, dy);
         }
+        void CreatePlayer()
+        {
+            player = new Player(8 * TILE_SIZE, 8 * TILE_SIZE); // Tạo player ở giữa map
+
+            // Thêm CẢ HAI vào Canvas
+            GameCanvas.Children.Add(player.PlayerLegsVisual);
+            GameCanvas.Children.Add(player.PlayerBodyVisual);
+
+            // Cập nhật vị trí ban đầu
+            player.Move(0, 0);
+        }
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Up || e.Key == Key.W) { moveUp = true; player.Facing = Direction.Up; }
@@ -114,7 +130,7 @@ namespace BTLT04_fromScratch
             if (e.Key == Key.Left || e.Key == Key.A) { moveLeft = true; player.Facing = Direction.Left; }
             if (e.Key == Key.Right || e.Key == Key.D) { moveRight = true; player.Facing = Direction.Right; }
 
-            player.UpdateSprite();
+            player.UpdateBodySprite();
         }
         private void OnKeyUp(object sender, KeyEventArgs e)
         {
@@ -146,6 +162,9 @@ namespace BTLT04_fromScratch
             gunShotPath = "Assets/Audio/GunShot.wav";
             destroyedPath = "Assets/Audio/Destroyed0.wav";
             gameOverPath = "Assets/Audio/GameOver.wav";
+
+            playerDefaultSpawnX = 8 * TILE_SIZE;
+            playerDefaultSpawnY = 8 * TILE_SIZE;
         }
         void DrawMap()
         {
@@ -156,7 +175,7 @@ namespace BTLT04_fromScratch
                     // Tạo đối tượng Image mới
                     Image tile = new Image();
 
-                    // Set kích thước ĐÃ PHÓNG TO (32x32)
+                    // Set kích thước ĐÃ PHÓNG TO (48x48)
                     tile.Width = TILE_SIZE;
                     tile.Height = TILE_SIZE;
 
@@ -183,7 +202,7 @@ namespace BTLT04_fromScratch
                     }
                     ;
 
-                    // Đặt vị trí trên Canvas (X = Cột * 32, Y = Hàng * 32)
+                    // Đặt vị trí trên Canvas (X = Cột * 48, Y = Hàng * 48)
                     Canvas.SetLeft(tile, c * TILE_SIZE);
                     Canvas.SetTop(tile, r * TILE_SIZE);
 

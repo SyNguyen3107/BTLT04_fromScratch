@@ -13,11 +13,20 @@ namespace BTLT04_fromScratch
         public double Y { get; set; }
         public double Speed { get; set; } = 3;
         public Direction Facing { get; set; } = Direction.Up;
-        public Image PlayerVisual { get; set; }
+        public Image PlayerBodyVisual { get; set; }
+        public Image PlayerLegsVisual { get; set; }//thêm hoạt ảnh chân của nhân vật
+        public bool IsMoving { get; set; } = false; // Cờ kiểm tra di chuyển
+
         // Lắng nghe event này để tạo Bullet
         public event Action<Point>? OnShoot;
 
         BitmapImage PlayerDown, PlayerUp, PlayerLeft, PlayerRight;
+        BitmapImage PlayerLeg0, PlayerLeg1, PlayerLeg2, PlayerLeg3;//thêm các sprite chân của nhân vật
+        List<BitmapImage> legFrames = new List<BitmapImage>();
+
+        private int currentLegFrame = 0;
+        private double animationTimer = 0;
+        private const double ANIMATION_SPEED = 0.1; // 0.1 giây đổi 1 frame chân
         public Player(double startX, double startY)
         {
             X = startX;
@@ -29,24 +38,79 @@ namespace BTLT04_fromScratch
             PlayerLeft = new BitmapImage(new Uri("Assets/Sprites/Sprite16x16/Character/PlayerLeft.png", UriKind.Relative));
             PlayerRight = new BitmapImage(new Uri("Assets/Sprites/Sprite16x16/Character/PlayerRight.png", UriKind.Relative));
 
-            PlayerVisual = new Image()
+            legFrames.Add(new BitmapImage(new Uri("Assets/Sprites/Sprite16x16/Character/PlayerLeg0.png", UriKind.Relative)));
+            legFrames.Add(new BitmapImage(new Uri("Assets/Sprites/Sprite16x16/Character/PlayerLeg1.png", UriKind.Relative)));
+            legFrames.Add(new BitmapImage(new Uri("Assets/Sprites/Sprite16x16/Character/PlayerLeg2.png", UriKind.Relative)));
+            legFrames.Add(new BitmapImage(new Uri("Assets/Sprites/Sprite16x16/Character/PlayerLeg3.png", UriKind.Relative)));
+
+            PlayerBodyVisual = new Image()
             {
                 Width = 48,
                 Height = 48,
                 Source = PlayerDown
             };
+            
+            RenderOptions.SetBitmapScalingMode(PlayerBodyVisual, BitmapScalingMode.NearestNeighbor);
             // Giữ ảnh sắc nét
-            RenderOptions.SetBitmapScalingMode(PlayerVisual, BitmapScalingMode.NearestNeighbor);
+            Panel.SetZIndex(PlayerBodyVisual, 5);
+            // Thân ở layer trên chân
+            PlayerLegsVisual = new Image()
+            {
+                Width = 48,
+                Height = 48,
+                Source = legFrames[0], // Bắt đầu bằng frame chân 0
+                Visibility = Visibility.Collapsed // Ẩn chân khi không di chuyển
+            };
+            RenderOptions.SetBitmapScalingMode(PlayerLegsVisual, BitmapScalingMode.NearestNeighbor);
+            Panel.SetZIndex(PlayerLegsVisual, 4); // Chân ở layer dưới thân
         }
 
-        public void UpdateSprite()
+        public void UpdateBodySprite()
         {
             switch(Facing)
             {
-                case Direction.Up: PlayerVisual.Source = PlayerUp; break;
-                case Direction.Down: PlayerVisual.Source = PlayerDown; break;
-                case Direction.Left: PlayerVisual.Source = PlayerLeft; break;
-                case Direction.Right: PlayerVisual.Source = PlayerRight; break;
+                case Direction.Up: PlayerBodyVisual.Source = PlayerUp; break;
+                case Direction.Down: PlayerBodyVisual.Source = PlayerDown; break;
+                case Direction.Left: PlayerBodyVisual.Source = PlayerLeft; break;
+                case Direction.Right: PlayerBodyVisual.Source = PlayerRight; break;
+            }
+        }
+        public void Update(double deltaTime)
+        {
+            // Chỉ chạy hoạt ảnh khi đang di chuyển
+            if (IsMoving)
+            {
+                UpdateAnimation(deltaTime);
+            }
+            else
+            {
+                // Nếu đứng yên, ẩn chân đi
+                PlayerLegsVisual.Visibility = Visibility.Collapsed;
+                animationTimer = 0; // Reset timer
+                currentLegFrame = 0; // Reset về frame 0
+                PlayerLegsVisual.Source = legFrames[0];
+            }
+        }
+        // (Hàm này được gọi bởi hàm Update ở trên)
+        private void UpdateAnimation(double deltaTime)
+        {
+            // Nếu đang di chuyển, hiện chân lên
+            PlayerLegsVisual.Visibility = Visibility.Visible;
+
+            // Đếm ngược đồng hồ
+            animationTimer -= deltaTime;
+
+            // Nếu hết giờ, đổi frame
+            if (animationTimer <= 0)
+            {
+                // Reset đồng hồ
+                animationTimer = ANIMATION_SPEED;
+
+                // Chuyển sang frame tiếp theo
+                currentLegFrame = (currentLegFrame + 1) % legFrames.Count; // % 4 (0, 1, 2, 3, 0, 1...)
+
+                // Cập nhật ảnh chân
+                PlayerLegsVisual.Source = legFrames[currentLegFrame];
             }
         }
         // Di chuyển Player
@@ -57,8 +121,9 @@ namespace BTLT04_fromScratch
             Y += dy;
 
             // Giới hạn trong Canvas 768x768 (trừ kích thước player)
-            X = Math.Max(0, Math.Min(768 - PlayerVisual.Width, X));
-            Y = Math.Max(0, Math.Min(768 - PlayerVisual.Height, Y));
+            X = Math.Max(48, Math.Min(768 - PlayerBodyVisual.Width - 48 , X));
+            Y = Math.Max(48, Math.Min(768 - PlayerBodyVisual.Height - 48, Y));
+            //thêm giới hạn của tường
 
             // Cập nhật hướng dựa trên dx dy
             if (dx > 0) Facing = Direction.Right;
@@ -66,11 +131,13 @@ namespace BTLT04_fromScratch
             else if (dy > 0) Facing = Direction.Down;
             else if (dy < 0) Facing = Direction.Up;
 
-            UpdateSprite();
+            UpdateBodySprite();
 
             // Cập nhật vị trí hiển thị
-            Canvas.SetLeft(PlayerVisual, X);
-            Canvas.SetTop(PlayerVisual, Y);
+            Canvas.SetLeft(PlayerBodyVisual, X);
+            Canvas.SetTop(PlayerBodyVisual, Y);
+            Canvas.SetLeft(PlayerLegsVisual, X);
+            Canvas.SetTop(PlayerLegsVisual, Y);
         }
         // Kích hoạt Bullet
         public void Shoot(System.Windows.Point mousePos)
