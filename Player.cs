@@ -13,8 +13,8 @@ namespace BTLT04_fromScratch
         public double Y { get; set; }
         public double Speed { get; set; } = 3;
         public Direction Facing { get; set; } = Direction.Up;
-        public Image PlayerBodyVisual { get; set; }
-        public Image PlayerLegsVisual { get; set; }//thêm hoạt ảnh chân của nhân vật
+        public Image BodyVisual { get; set; }
+        public Image LegsVisual { get; set; }//thêm hoạt ảnh chân của nhân vật
         public bool IsMoving { get; set; } = false; // Cờ kiểm tra di chuyển
 
         // Lắng nghe event này để tạo Bullet
@@ -43,36 +43,36 @@ namespace BTLT04_fromScratch
             legFrames.Add(new BitmapImage(new Uri("Assets/Sprites/Sprite16x16/Character/PlayerLeg2.png", UriKind.Relative)));
             legFrames.Add(new BitmapImage(new Uri("Assets/Sprites/Sprite16x16/Character/PlayerLeg3.png", UriKind.Relative)));
 
-            PlayerBodyVisual = new Image()
+            BodyVisual = new Image()
             {
                 Width = 48,
                 Height = 48,
                 Source = PlayerDown
             };
             
-            RenderOptions.SetBitmapScalingMode(PlayerBodyVisual, BitmapScalingMode.NearestNeighbor);
+            RenderOptions.SetBitmapScalingMode(BodyVisual, BitmapScalingMode.NearestNeighbor);
             // Giữ ảnh sắc nét
-            Panel.SetZIndex(PlayerBodyVisual, 5);
+            Panel.SetZIndex(BodyVisual, 5);
             // Thân ở layer trên chân
-            PlayerLegsVisual = new Image()
+            LegsVisual = new Image()
             {
                 Width = 48,
                 Height = 48,
                 Source = legFrames[0], // Bắt đầu bằng frame chân 0
                 Visibility = Visibility.Collapsed // Ẩn chân khi không di chuyển
             };
-            RenderOptions.SetBitmapScalingMode(PlayerLegsVisual, BitmapScalingMode.NearestNeighbor);
-            Panel.SetZIndex(PlayerLegsVisual, 4); // Chân ở layer dưới thân
+            RenderOptions.SetBitmapScalingMode(LegsVisual, BitmapScalingMode.NearestNeighbor);
+            Panel.SetZIndex(LegsVisual, 4); // Chân ở layer dưới thân
         }
 
         public void UpdateBodySprite()
         {
             switch(Facing)
             {
-                case Direction.Up: PlayerBodyVisual.Source = PlayerUp; break;
-                case Direction.Down: PlayerBodyVisual.Source = PlayerDown; break;
-                case Direction.Left: PlayerBodyVisual.Source = PlayerLeft; break;
-                case Direction.Right: PlayerBodyVisual.Source = PlayerRight; break;
+                case Direction.Up: BodyVisual.Source = PlayerUp; break;
+                case Direction.Down: BodyVisual.Source = PlayerDown; break;
+                case Direction.Left: BodyVisual.Source = PlayerLeft; break;
+                case Direction.Right: BodyVisual.Source = PlayerRight; break;
             }
         }
         public void Update(double deltaTime)
@@ -85,17 +85,17 @@ namespace BTLT04_fromScratch
             else
             {
                 // Nếu đứng yên, ẩn chân đi
-                PlayerLegsVisual.Visibility = Visibility.Collapsed;
+                LegsVisual.Visibility = Visibility.Collapsed;
                 animationTimer = 0; // Reset timer
                 currentLegFrame = 0; // Reset về frame 0
-                PlayerLegsVisual.Source = legFrames[0];
+                LegsVisual.Source = legFrames[0];
             }
         }
         // (Hàm này được gọi bởi hàm Update ở trên)
         private void UpdateAnimation(double deltaTime)
         {
             // Nếu đang di chuyển, hiện chân lên
-            PlayerLegsVisual.Visibility = Visibility.Visible;
+            LegsVisual.Visibility = Visibility.Visible;
 
             // Đếm ngược đồng hồ
             animationTimer -= deltaTime;
@@ -110,7 +110,7 @@ namespace BTLT04_fromScratch
                 currentLegFrame = (currentLegFrame + 1) % legFrames.Count; // % 4 (0, 1, 2, 3, 0, 1...)
 
                 // Cập nhật ảnh chân
-                PlayerLegsVisual.Source = legFrames[currentLegFrame];
+                LegsVisual.Source = legFrames[currentLegFrame];
             }
         }
         // Di chuyển Player
@@ -121,8 +121,8 @@ namespace BTLT04_fromScratch
             Y += dy;
 
             // Giới hạn trong Canvas 768x768 (trừ kích thước player)
-            X = Math.Max(48, Math.Min(768 - PlayerBodyVisual.Width - 48 , X));
-            Y = Math.Max(48, Math.Min(768 - PlayerBodyVisual.Height - 48, Y));
+            X = Math.Max(48, Math.Min(768 - BodyVisual.Width - 48 , X));
+            Y = Math.Max(48, Math.Min(768 - BodyVisual.Height - 48, Y));
             //thêm giới hạn của tường
 
             // Cập nhật hướng dựa trên dx dy
@@ -134,10 +134,10 @@ namespace BTLT04_fromScratch
             UpdateBodySprite();
 
             // Cập nhật vị trí hiển thị
-            Canvas.SetLeft(PlayerBodyVisual, X);
-            Canvas.SetTop(PlayerBodyVisual, Y);
-            Canvas.SetLeft(PlayerLegsVisual, X);
-            Canvas.SetTop(PlayerLegsVisual, Y);
+            Canvas.SetLeft(BodyVisual, X);
+            Canvas.SetTop(BodyVisual, Y);
+            Canvas.SetLeft(LegsVisual, X);
+            Canvas.SetTop(LegsVisual, Y);
         }
         // Kích hoạt Bullet
         public void Shoot(System.Windows.Point mousePos)
