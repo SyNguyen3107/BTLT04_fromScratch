@@ -2,43 +2,70 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace BTLT04_fromScratch
 {
-    internal class Enemy
+    public class Enemy
     {
-        public double X;
-        public double Y;
-        public Image EnemyVisual;
+        public double x;
+        public double y;
+        public double Speed = 1;
         public bool IsDead = false;
-
-        public Enemy(Image visual, double x, double y)
+        public Image EnemyVisual { get; set; }
+        private BitmapImage[] frames = new BitmapImage[2];
+        private int currentFrame = 0;
+        private double frameCounter = 0;
+        private double frameDistance = 1;
+        public Enemy(double x, double y)
         {
-            EnemyVisual = visual;
-            X = x;
-            Y = y;
+            this.x = x;
+            this.y = y;
 
-            EnemyVisual.Width = 48;
-            EnemyVisual.Height = 48;
-            RenderOptions.SetBitmapScalingMode(EnemyVisual, BitmapScalingMode.NearestNeighbor);
+            frames[0] = new BitmapImage(new Uri("Assets/Sprites/Sprite16x16/Enemy/Orc0.png", UriKind.Relative));
+            frames[1] = new BitmapImage(new Uri("Assets/Sprites/Sprite16x16/Enemy/Orc1.png", UriKind.Relative));
+            EnemyVisual = new Image
+            {
+                Width = 48,
+                Height = 48,
+                Source = frames[0]
+            };
+            Canvas.SetLeft(EnemyVisual, x);
+            Canvas.SetTop(EnemyVisual, y);
+        }
+        public void Update(Player player)
+        {
+            if (currentFrame == 2) currentFrame = 0;
+            //Di chuyển
+            double dx = player.X - x;
+            double dy = player.Y - y;
+            double distance = Math.Sqrt(dx * dx + dy * dy);
 
-            UpdateVisual();
+            // Chuẩn hóa vector và di chuyển về phía player
+            if (distance > 0)
+            {
+                dx /= distance;
+                dy /= distance;
+            }
+            // Cập nhật vị trí
+            x += dx * Speed;
+            y += dy * Speed;
+            Canvas.SetLeft(EnemyVisual, x);
+            Canvas.SetTop(EnemyVisual, y);
+            // Cập nhật hoạt ảnh
+            frameCounter += Math.Sqrt(x * x + y * y) / frameDistance;
+            if (frameCounter >= frameDistance)
+            {
+                frameCounter = 0;
+                currentFrame = (currentFrame + 1) % frames.Length;
+                EnemyVisual.Source = frames[currentFrame];
+            }
         }
 
-        public void Update(double deltaSeconds)
-        {
-
-        }
-
-        public void UpdateVisual()
-        {
-            Canvas.SetLeft(EnemyVisual, X);
-            Canvas.SetTop(EnemyVisual, Y);
-        }
 
         public Rect GetRect()
         {
-            return new Rect(X, Y, EnemyVisual.Width, EnemyVisual.Height);
+            return new Rect(x, y, EnemyVisual.Width, EnemyVisual.Height);
         }
     }
 }
