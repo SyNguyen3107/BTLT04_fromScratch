@@ -28,9 +28,7 @@ namespace BTLT04_fromScratch
             this.frames[0] = frame1;
             this.frames[1] = frame2;
 
-            // --- SỬA LỖI ---
-
-            // BƯỚC 1: Tạo đối tượng Image TRƯỚC
+            // BƯỚC 1: Tạo đối tượng Image
             EnemyVisual = new Image
             {
                 Width = 48,
@@ -38,7 +36,7 @@ namespace BTLT04_fromScratch
                 Source = frames[0]
             };
 
-            // BƯỚC 2: SAU KHI đã có Image, mới set chống mờ
+            // BƯỚC 2: set chống mờ
             RenderOptions.SetBitmapScalingMode(EnemyVisual, BitmapScalingMode.NearestNeighbor);
 
             // BƯỚC 3: Cập nhật vị trí ban đầu

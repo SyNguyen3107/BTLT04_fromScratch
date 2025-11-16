@@ -11,7 +11,7 @@ namespace BTLT04_fromScratch
     {
         public double X { get; set; }
         public double Y { get; set; }
-        public double Speed { get; set; } = 1.5;
+        public double Speed { get; set; } = 2.0;
         public Direction Facing { get; set; } = Direction.Down;
         public Image BodyVisual { get; set; }
         public Image LegsVisual { get; set; } //thêm các ảnh chân của nhân vật
@@ -21,7 +21,6 @@ namespace BTLT04_fromScratch
         public event Action<Point>? OnShoot;
 
         BitmapImage PlayerDown, PlayerUp, PlayerLeft, PlayerRight;
-        BitmapImage PlayerLeg0, PlayerLeg1, PlayerLeg2, PlayerLeg3;//thêm các sprite chân của nhân vật
         List<BitmapImage> legFrames = new List<BitmapImage>();
 
         private int currentLegFrame = 0;
@@ -83,15 +82,13 @@ namespace BTLT04_fromScratch
             else
             {
                 animationTimer = 0; // Reset timer
-                currentLegFrame = 0; // Reset về frame 0
-                LegsVisual.Source = legFrames[0];
+                currentLegFrame = 1; // Reset về frame 1
+                LegsVisual.Source = legFrames[currentLegFrame];
             }
         }
-        // (Hàm này được gọi bởi hàm Update ở trên)
+        // Hàm này được gọi bởi hàm Update ở trên
         private void UpdateAnimation(double deltaTime)
         {
-            // Nếu đang di chuyển, hiện chân lên
-            LegsVisual.Visibility = Visibility.Visible;
 
             // Đếm ngược đồng hồ
             animationTimer -= deltaTime;
@@ -116,10 +113,9 @@ namespace BTLT04_fromScratch
             X += dx;
             Y += dy;
 
-            // Giới hạn trong Canvas 768x768 (trừ kích thước player)
+            // Giới hạn trong Canvas 768 - kích thước player - kích thước tường
             X = Math.Max(48, Math.Min(768 - BodyVisual.Width - 48, X));
             Y = Math.Max(48, Math.Min(768 - BodyVisual.Height - 48, Y));
-            //thêm giới hạn của tường
 
             // Cập nhật hướng dựa trên dx dy
             if (dx > 0) Facing = Direction.Right;
@@ -140,7 +136,6 @@ namespace BTLT04_fromScratch
         {
             // Nhiệm vụ kích hoạt Bullet
             OnShoot?.Invoke(mousePos);
-            System.Diagnostics.Debug.WriteLine($"Shoot at {mousePos}");
         }
     }
 }

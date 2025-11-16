@@ -10,7 +10,7 @@ namespace BTLT04_fromScratch
         public double Y;
         public Image BulletVisual;
         public Vector Direction; // chuẩn hoá hướng vector
-        public double Speed = 600.0; // số pixels / giây
+        public double Speed = 500.0; // số pixels / giây
         public bool IsDead = false;
 
         public Bullet(double x, double y, Vector direction, Image visual)

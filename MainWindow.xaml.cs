@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;       // Cần thư viện này
+﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -11,7 +11,8 @@ namespace BTLT04_fromScratch
 {
     public partial class MainWindow : Window
     {
-        //Map
+        //--- Map ---
+        BitmapImage Desert1, Desert2, Desert3, Desert4, Desert6;
         public const int TILE_SIZE = 48; // Đổi thành public const để lớp khác (như Player) có thể thấy
         const int MAP_ROWS = 16;
         const int MAP_COLS = 16;
@@ -43,29 +44,22 @@ namespace BTLT04_fromScratch
         bool moveUp = false, moveDown = false, moveLeft = false, moveRight = false;
         int playerDefaultSpawnX = 8 * TILE_SIZE, playerDefaultSpawnY = 8 * TILE_SIZE;
 
-        // --- Enemy (Tạm thời dùng List<Image> theo yêu cầu) ---
+        // --- Enemy ---
+        BitmapImage Orc0, Orc1;
         DispatcherTimer spawnTimer;
         int currentWave = 0;
         int enemyAlive = 0, enemyToSpawn = 0;
         Random random = new Random();
-        List<Enemy> activeEnemies = new List<Enemy>();
-
-        // --- Sprites ---
-        BitmapImage Desert1, Desert2, Desert3, Desert4, Desert6;
-        BitmapImage Bullet;
-        BitmapImage Orc0, Orc1;
-
+        List<Enemy> activeEnemies = new List<Enemy>();    
+        
         // --- Âm thanh ---
         MediaPlayer bgMusic = new MediaPlayer(); string musicPath;
         string gunShotPath;
         string destroyedPath;
         MediaPlayer GameOver = new MediaPlayer(); string gameOverPath;
 
-
-        // Bộ hỗ trợ đo thời gian cho vòng lặp game
-        Stopwatch loopStopwatch = new Stopwatch();
-        long lastTicks = 0;
-
+        //--- Đạn ---
+        BitmapImage Bullet;
         List<Bullet> activeBullets = new List<Bullet>();// danh sách quản lý các viên đạn đang hoạt động
 
         public MainWindow()
@@ -83,8 +77,8 @@ namespace BTLT04_fromScratch
 
             this.KeyDown += OnKeyDown;
             this.KeyUp += OnKeyUp;
-            GameCanvas.MouseLeftButtonDown += GameCanvas_MouseLeftButtonDown;
 
+            GameCanvas.MouseLeftButtonDown += GameCanvas_MouseLeftButtonDown;
             StartNextWave();
         }
         private void GameLoop(object sender, EventArgs e)
@@ -97,85 +91,68 @@ namespace BTLT04_fromScratch
             double delta = ts.TotalSeconds;
             if (delta <= 0) return;
 
-            // 2. Xử lý Input và Di chuyển Player (Từ GameLoop mới)
+            // 2. Xử lý Input và Di chuyển Player
             double dx = 0, dy = 0;
             if (moveUp) dy -= player.Speed;
             if (moveDown) dy += player.Speed;
             if (moveLeft) dx -= player.Speed;
             if (moveRight) dx += player.Speed;
 
-            if (dx != 0 || dy != 0)
-            {
-                player.IsMoving = true;
-                player.Move(dx, dy);
-            }
-            else
-            {
-                player.IsMoving = false;
-            }
-
+            player.IsMoving = (dx != 0 || dy != 0);
+            if (player.IsMoving) player.Move(dx, dy);
             player.Update(delta);
 
             // 3. Cập nhật bullet
-            foreach (var b in activeBullets)
-            {
-                b.Update(delta);
-            }
+            foreach (var b in activeBullets) b.Update(delta);
 
             // 4. Cập nhật kẻ địch
-            foreach (var en in activeEnemies)
+            foreach (var en in activeEnemies) en.Update(player, delta);
+
+            // 5. Kiểm tra đạn va tường
+            for (int i = activeBullets.Count - 1; i >= 0; i--)
             {
-                en.Update(player, delta); // Gọi hàm Update của lớp Enemy
-            }
-            // 4. Cập nhật đạn va cham với tường
-            foreach (var b in activeBullets)
-            {
-                if (b.IsDead) continue;
-                // Lấy tọa độ TÂM của viên đạn để kiểm tra
+                var b = activeBullets[i];
+                if (b.IsDead)
+                {
+                    DestroyBullet(b);
+                    continue;
+                }
                 double bulletCenterX = b.X + b.BulletVisual.Width / 2;
                 double bulletCenterY = b.Y + b.BulletVisual.Height / 2;
-                // Chuyển đổi tọa độ Pixel sang tọa độ Ô Lưới
                 int gridX = (int)(bulletCenterX / TILE_SIZE);
                 int gridY = (int)(bulletCenterY / TILE_SIZE);
 
                 if (gridX < 0 || gridX >= MAP_COLS || gridY < 0 || gridY >= MAP_ROWS)
                 {
                     b.IsDead = true;
+                    DestroyBullet(b);
                     continue;
                 }
-                // Lấy loại gạch tại ô mà đạn đang ở
                 int tileType = mapMatrix[gridY, gridX];
-
-                // 1 và 6 là tường
                 if (tileType == 1 || tileType == 6)
                 {
                     b.IsDead = true;
+                    DestroyBullet(b);
                 }
             }
             // 6. Kiểm tra va chạm: Đạn vs Kẻ địch
-            foreach (var b in activeBullets)
+            for (int i = activeBullets.Count - 1; i >= 0; i--)
             {
+                var b = activeBullets[i];
                 if (b.IsDead) continue;
-
-                Console.WriteLine($"Bullet alive at ({b.X}, {b.Y}), IsDead={b.IsDead}");
 
                 Rect br = b.GetRect();
                 foreach (var en in activeEnemies)
                 {
                     if (en.IsDead) continue;
-                    Rect er = en.GetRect();
-
-                    if (br.IntersectsWith(er))
+                    if (br.IntersectsWith(en.GetRect()))
                     {
-                        Console.WriteLine($"COLLISION! Bullet IsDead BEFORE: {b.IsDead}, Enemy IsDead BEFORE: {en.IsDead}");
                         b.IsDead = true;
                         en.IsDead = true;
-                        Console.WriteLine($"COLLISION! Bullet IsDead AFTER: {b.IsDead}, Enemy IsDead AFTER: {en.IsDead}");
+                        DestroyBullet(b);
                         break;
                     }
                 }
-
-                Console.WriteLine($"After enemy check: Bullet IsDead={b.IsDead}");
             }
             // 7. Kiểm tra va chạm: Kẻ địch vs Người chơi
             Rect playerRect = new Rect(player.X, player.Y, 48, 48);
@@ -185,38 +162,35 @@ namespace BTLT04_fromScratch
                 if (en.GetRect().IntersectsWith(playerRect))
                 {
                     EndGame();
-                    break;
+                    return; // Thoát luôn, không cần xử lý tiếp
                 }
             }
 
-            // 8. Dọn dẹp các viên đạn
-            for (int i = activeBullets.Count - 1; i >= 0; i--)
-            {
-                if (activeBullets[i].IsDead)
-                {
-                    var vis = activeBullets[i].BulletVisual;
-                    if (GameCanvas.Children.Contains(vis)) GameCanvas.Children.Remove(vis);
-                    activeBullets.RemoveAt(i);
-                }
-            }
-
-            // 9. Dọn dẹp kẻ địch đã chết
+            // 8. Dọn dẹp kẻ địch đã chết (DUYỆT NGƯỢC)
             for (int i = activeEnemies.Count - 1; i >= 0; i--)
             {
                 if (activeEnemies[i].IsDead)
                 {
-                    var en = activeEnemies[i]; // Lấy đối tượng Enemy
-                    if (GameCanvas.Children.Contains(en.EnemyVisual)) GameCanvas.Children.Remove(en.EnemyVisual);
-                    activeEnemies.RemoveAt(i);
-
-                    // Gọi hàm OnEnemyKilled
-                    OnEnemyKilled(en);
+                    DestroyEnemy(activeEnemies[i]);
                 }
             }
         }
+        void DestroyBullet(Bullet b)
+        {
+            var vis = b.BulletVisual;
+            if (GameCanvas.Children.Contains(vis)) GameCanvas.Children.Remove(vis);
+            activeBullets.Remove(b);
+        }
+        void DestroyEnemy(Enemy en)
+        {
+            if (GameCanvas.Children.Contains(en.EnemyVisual)) GameCanvas.Children.Remove(en.EnemyVisual);
+            activeEnemies.Remove(en);
+
+            OnEnemyKilled(en);
+        }
         void CreatePlayer()
         {
-            player = new Player(playerDefaultSpawnX, playerDefaultSpawnY); // Sửa: Dùng biến toàn cục
+            player = new Player(playerDefaultSpawnX, playerDefaultSpawnY);
 
             // Thêm CẢ HAI vào Canvas
             GameCanvas.Children.Add(player.LegsVisual);
@@ -225,7 +199,6 @@ namespace BTLT04_fromScratch
             // Cập nhật vị trí ban đầu
             player.Move(0, 0);
 
-            // THÊM DÒNG NÀY:
             player.OnShoot += Player_OnShoot;
         }
         private void Player_OnShoot(Point target)
@@ -239,7 +212,7 @@ namespace BTLT04_fromScratch
             dir.Normalize();
 
             SpawnBullet(px, py, dir);
-   
+
         }
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
@@ -247,10 +220,6 @@ namespace BTLT04_fromScratch
             if (e.Key == Key.Down || e.Key == Key.S) { moveDown = true; player.Facing = Direction.Down; }
             if (e.Key == Key.Left || e.Key == Key.A) { moveLeft = true; player.Facing = Direction.Left; }
             if (e.Key == Key.Right || e.Key == Key.D) { moveRight = true; player.Facing = Direction.Right; }
-
-            // Sửa lỗi: Không cần gọi UpdateBodySprite ở đây,
-            // vì hàm player.Move() đã tự gọi nó rồi.
-            // player.UpdateBodySprite(); 
         }
         private void OnKeyUp(object sender, KeyEventArgs e)
         {
@@ -261,10 +230,9 @@ namespace BTLT04_fromScratch
         }
         private void GameCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (!isGameRunning) return; // Không cho bắn khi đã Game Over
+            if (!isGameRunning) return;
             Point target = e.GetPosition(GameCanvas);
             player.Shoot(target);
-
         }
         void LoadAssets()
         {

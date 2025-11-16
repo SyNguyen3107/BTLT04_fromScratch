@@ -8,14 +8,12 @@
         Title="MainWindow" Height="820" Width="800"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
-        Icon="/Assets/Icon/icon.png"
-        WindowState="Maximized">
+        Icon="/Assets/Icon/icon.png">
     <Grid Background="#333333">
         <Canvas Name="GameCanvas" 
         Height="768" Width="768"
         Background="Black"
         HorizontalAlignment="Center" VerticalAlignment="Center"
-        MouseLeftButtonDown="GameCanvas_MouseLeftButtonDown"
         ClipToBounds="True"/>
             <Grid x:Name="GameOverMenu"
               Background="#0E0B28"
