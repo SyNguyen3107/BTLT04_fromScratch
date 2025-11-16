@@ -9,23 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Assets\Audio\Coin.wav" />
     <None Remove="Assets\Audio\Destroyed0.wav" />
-    <None Remove="Assets\Audio\Destroyed1.wav" />
-    <None Remove="Assets\Audio\DropItem.wav" />
-    <None Remove="Assets\Audio\Ending.wav" />
-    <None Remove="Assets\Audio\FinalBoss.wav" />
     <None Remove="Assets\Audio\GameOver.wav" />
     <None Remove="Assets\Audio\Gunshot.mp3" />
-    <None Remove="Assets\Audio\HitEnemy.mp3" />
-    <None Remove="Assets\Audio\ItemBought.wav" />
     <None Remove="Assets\Audio\Overworld.wav" />
-    <None Remove="Assets\Audio\PickUp.wav" />
-    <None Remove="Assets\Audio\PlayerDie.wav" />
-    <None Remove="Assets\Audio\PlayerFootstep.wav" />
-    <None Remove="Assets\Audio\ScreenNuke.wav" />
-    <None Remove="Assets\Audio\TheOutlaw.wav" />
-    <None Remove="Assets\Audio\ZombieMode.wav" />
     <None Remove="Assets\Font\stardew-valley-stonks.ttf" />
     <None Remove="Assets\Sprites\Sprite16x16\Character\PlayerDown.png" />
     <None Remove="Assets\Sprites\Sprite16x16\Character\PlayerLeft.png" />
@@ -42,22 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Assets\Audio\Coin.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Assets\Audio\Destroyed0.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Audio\Destroyed1.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Audio\DropItem.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Audio\Ending.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Audio\FinalBoss.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\Audio\GameOver.wav">
@@ -66,31 +38,7 @@
     <Content Include="Assets\Audio\Gunshot.mp3">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Audio\HitEnemy.mp3">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Audio\ItemBought.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Assets\Audio\Overworld.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Audio\PickUp.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Audio\PlayerDie.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Audio\PlayerFootstep.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Audio\ScreenNuke.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Audio\TheOutlaw.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Audio\ZombieMode.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Resource Include="Assets\Font\stardew-valley-stonks.ttf" />
